@@ -23,11 +23,16 @@ pub fn main() !void {
 
     var buffer2: [1024]u8 = undefined;
 
-    _ = try stream.write("QUIT \n");
-    var mread = try stream.read(&buffer2);
+    _ = try stream.write("LIST \n");
+    var data_s = try net.tcpConnectToAddress(Address.initIp4([_]u8{127, 0, 0, 1}, 1234));
+    var mread = try data_s.read(&buffer2);
+    var tread = try stream.read(&buffer);
+    _ = tread;
     const message2 = buffer2[0..mread];
-    i = trimMess(message2, "\n");
+    i = trimMess(message2, " ");
     std.debug.print("read: {s}\n", .{buffer2[0..i]});
+    _ = try stream.write("QUIT \n");
+    data_s.close();
     stream.close();
     
 }

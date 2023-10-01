@@ -140,7 +140,6 @@ pub const FTP_Server = struct {
 
             var conc = try constructMessage(alloc, trimmed);
             _ = try client.write(conc);
-            _ = arena.reset(reset_mode);
         }
 
         std.debug.print("Closing connection...\n", .{});

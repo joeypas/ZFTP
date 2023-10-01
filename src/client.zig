@@ -29,7 +29,7 @@ pub fn main() !void {
     var tread = try stream.read(&buffer);
     _ = tread;
     const message2 = buffer2[0..mread];
-    i = trimMess(message2, " ");
+    i = trimMess(message2, "\n");
     std.debug.print("read: {s}\n", .{buffer2[0..i]});
     _ = try stream.write("QUIT \n");
     data_s.close();

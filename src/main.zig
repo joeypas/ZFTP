@@ -107,7 +107,8 @@ pub const FTP_Server = struct {
                         var con = try data_conn.accept();
                         var path: [1024]u8 = undefined;
                         const ret = try std.os.getcwd(&path);
-                        _ = try con.stream.write(ret);
+                        const message = try constructMessage(alloc, ret);
+                        _ = try con.stream.write(message);
                         con.stream.close();
                     },
                     Code.LIST => {

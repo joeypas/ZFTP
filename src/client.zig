@@ -12,7 +12,7 @@ pub fn trimMess(m: []u8, delim: []const u8) usize {
 }
 
 pub fn main() !void {
-    const addr = Address.initIp4([_]u8{ 127, 0, 0, 1}, 8080);
+    const addr = Address.initIp4([_]u8{ 127, 0, 0, 1 }, 8080);
     var stream = try net.tcpConnectToAddress(addr);
     var buffer: [1024]u8 = undefined;
     _ = try stream.write("HELP \n");
@@ -24,7 +24,7 @@ pub fn main() !void {
     var buffer2: [1024]u8 = undefined;
 
     _ = try stream.write("LIST \n");
-    var data_s = try net.tcpConnectToAddress(Address.initIp4([_]u8{127, 0, 0, 1}, 1234));
+    var data_s = try net.tcpConnectToAddress(Address.initIp4([_]u8{ 127, 0, 0, 1 }, 1234));
     var mread = try data_s.read(&buffer2);
     var tread = try stream.read(&buffer);
     _ = tread;
@@ -34,5 +34,4 @@ pub fn main() !void {
     _ = try stream.write("QUIT \n");
     data_s.close();
     stream.close();
-    
 }

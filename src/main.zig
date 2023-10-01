@@ -7,9 +7,7 @@ const ip4Address = net.Ip4Address;
 const thread = std.Thread;
 const os = std.os.linux;
 
-
 pub const FTP_Server = struct {
-
     allocator: *std.mem.Allocator,
     threads: std.ArrayList(thread),
     server: StreamServer,
@@ -27,10 +25,10 @@ pub const FTP_Server = struct {
 
     pub fn init(allocator: *std.mem.Allocator, port: u16) FTP_Server {
         return FTP_Server{
-            .server = StreamServer.init(.{.reuse_address = true}),
+            .server = StreamServer.init(.{ .reuse_address = true }),
             .allocator = allocator,
             .threads = std.ArrayList(thread).init(allocator.*),
-            .addr = Address.initIp4([_]u8{127, 0, 0, 1}, port),
+            .addr = Address.initIp4([_]u8{ 127, 0, 0, 1 }, port),
         };
     }
 
@@ -51,40 +49,39 @@ pub const FTP_Server = struct {
         while (i < 5) {
             var connection = try self.server.accept();
             i += 1;
-            _ = try self.threads.append(try thread.spawn(.{}, handleClient, .{self, &connection}));
+            _ = try self.threads.append(try thread.spawn(.{}, handleClient, .{ self, &connection }));
         }
         for (self.threads.items) |t| t.join();
     }
 
-    pub fn constructMessage( allocator: std.mem.Allocator, data: []u8) ![]u8 {
+    pub fn constructMessage(allocator: std.mem.Allocator, data: []u8) ![]u8 {
         const rec: []const u8 = "Received: ";
-        const slices = [_] []const u8{rec, data, "\n"};
-        return try std.mem.concat( allocator, u8,  &slices);
+        const slices = [_][]const u8{ rec, data, "\n" };
+        return try std.mem.concat(allocator, u8, &slices);
     }
 
     pub fn handleClient(self: *FTP_Server, client_conn: *net.StreamServer.Connection) !void {
         // start stream for data
-        var data_conn = StreamServer.init(.{.reuse_address = true});
+        var data_conn = StreamServer.init(.{ .reuse_address = true });
         defer data_conn.deinit();
-        var data_addr = Address.initIp4([_]u8{127, 0, 0, 1}, 1234);
+        var data_addr = Address.initIp4([_]u8{ 127, 0, 0, 1 }, 1234);
         _ = try data_conn.listen(data_addr);
-
 
         // Init receive buffer
         var client = client_conn.*.stream;
         var arena = std.heap.ArenaAllocator.init(self.allocator.*);
         const reset_mode = std.heap.ArenaAllocator.ResetMode.free_all;
         defer arena.deinit();
-        
+
         const alloc = arena.allocator();
 
         while (true) {
             _ = arena.reset(reset_mode);
             var buf = try alloc.alloc(u8, 100);
-            
+
             // Read from stream
             const n = try client.read(buf);
-            
+
             // Convert message to Code
             const code_needle = trimMess(buf[0..n], " ");
             const code: ?Code = std.meta.stringToEnum(Code, buf[0..code_needle]);
@@ -118,19 +115,18 @@ pub const FTP_Server = struct {
                         var contents = std.ArrayList([]const u8).init(alloc);
                         defer contents.deinit();
                         while (try itr.next()) |entry| {
-                            const entry_r = try std.mem.concat(alloc, u8, &[_] []const u8{entry.name, "\n"});
+                            const entry_r = try std.mem.concat(alloc, u8, &[_][]const u8{ entry.name, "\n" });
                             try contents.append(entry_r);
                         }
                         const ret = try std.mem.concat(alloc, u8, contents.items);
-                        const retn = try std.mem.concat(alloc, u8, &[_] []const u8{ret, " "});
+                        const retn = try std.mem.concat(alloc, u8, &[_][]const u8{ ret, " " });
                         _ = try con.stream.write(retn);
                         con.stream.close();
                     },
                     Code.STOR => std.debug.print("STOR COMMAND\n", .{}),
                     Code.RETR => std.debug.print("RETR COMMAND\n", .{}),
                 }
-            }
-            else {
+            } else {
                 std.debug.print("{s} command not found", .{buf[0..trimMess(buf[0..n], " ")]});
             }
 
@@ -141,17 +137,12 @@ pub const FTP_Server = struct {
 
         std.debug.print("Closing connection...\n", .{});
         client.close();
-        
     }
-
-
 };
-
-
 
 pub fn main() !void {
     var allocator = std.heap.c_allocator;
-    var server = FTP_Server.init(&allocator, 8080); 
+    var server = FTP_Server.init(&allocator, 8080);
     defer server.deinit();
 
     try server.start();

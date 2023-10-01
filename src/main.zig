@@ -148,7 +148,7 @@ pub const FTP_Server = struct {
 };
 
 pub fn main() !void {
-    var allocator = std.heap.c_allocator;
+    var allocator = std.heap.page_allocator;
     var server = FTP_Server.init(&allocator, 8080);
     defer server.deinit();
 

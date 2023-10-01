@@ -23,7 +23,7 @@ pub fn main() !void {
 
     var buffer2: [1024]u8 = undefined;
 
-    _ = try stream.write("LIST \n");
+    _ = try stream.write("CWD \n");
     var data_s = try net.tcpConnectToAddress(Address.initIp4([_]u8{ 127, 0, 0, 1 }, 1234));
     var mread = try data_s.read(&buffer2);
     var tread = try stream.read(&buffer);

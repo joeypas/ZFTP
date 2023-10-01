@@ -102,7 +102,14 @@ pub const FTP_Server = struct {
                         break;
                     },
                     Code.USER => std.debug.print("USER COMMAND\n", .{}),
-                    Code.CWD => std.debug.print("CWD COMMAND\n", .{}),
+                    Code.CWD => {
+                        std.debug.print("CWD COMMAND\n", .{});
+                        var con = try data_conn.accept();
+                        var path: [1024]u8 = undefined;
+                        const ret = try std.os.getcwd(&path);
+                        _ = try con.stream.write(ret);
+                        con.stream.close();
+                    },
                     Code.LIST => {
                         std.debug.print("LIST COMMAND\n", .{});
                         var con = try data_conn.accept();

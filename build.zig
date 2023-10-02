@@ -23,12 +23,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    const exe2 = b.addExecutable(.{
-        .name = "Client",
-        .root_source_file = .{ .path = "src/client.zig" },
-        .target = target,
-        .optimize = optimize
-    });
+    const exe2 = b.addExecutable(.{ .name = "Client", .root_source_file = .{ .path = "src/client.zig" }, .target = target, .optimize = optimize });
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default

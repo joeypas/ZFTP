@@ -23,6 +23,12 @@ pub const FTP_Server = struct {
         } else i;
     }
 
+    fn constructMessage(allocator: std.mem.Allocator, data: []u8) ![]u8 {
+        const rec: []const u8 = "Received: ";
+        const slices = [_][]const u8{ rec, data, "\n" };
+        return try std.mem.concat(allocator, u8, &slices);
+    }
+
     pub fn init(allocator: *std.mem.Allocator, port: u16) FTP_Server {
         return FTP_Server{
             .server = StreamServer.init(.{ .reuse_address = true }),
@@ -52,12 +58,6 @@ pub const FTP_Server = struct {
             _ = try self.threads.append(try thread.spawn(.{}, handleClient, .{ self, &connection }));
         }
         for (self.threads.items) |t| t.join();
-    }
-
-    pub fn constructMessage(allocator: std.mem.Allocator, data: []u8) ![]u8 {
-        const rec: []const u8 = "Received: ";
-        const slices = [_][]const u8{ rec, data, "\n" };
-        return try std.mem.concat(allocator, u8, &slices);
     }
 
     pub fn handleClient(self: *FTP_Server, client_conn: *net.StreamServer.Connection) !void {
